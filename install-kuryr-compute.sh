@@ -36,8 +36,8 @@ capability_scope = global
 process_external_connectivity = False
 
 [neutron]
-www_authenticate_uri = http://controller:5000
-auth_url = http://controller:5000
+www_authenticate_uri = http://ctl:5000
+auth_url = http://ctl:5000
 username = kuryr
 user_domain_name = default
 password = $KURYR_PASSWORD

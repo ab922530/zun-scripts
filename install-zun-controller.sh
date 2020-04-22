@@ -21,11 +21,11 @@ openstack role add --project service --user zun admin
 openstack service create --name zun \
     --description "Container Service" container
 openstack endpoint create --region RegionOne \
-    container public http://controller:9517/v1
+    container public http://ctl:9517/v1
 openstack endpoint create --region RegionOne \
-    container internal http://controller:9517/v1
+    container internal http://ctl:9517/v1
 openstack endpoint create --region RegionOne \
-    container admin http://controller:9517/v1
+    container admin http://ctl:9517/v1
 
 # Create zun user
 groupadd --system zun
@@ -52,26 +52,28 @@ cd zun
 pip3 install -r requirements.txt
 python3 setup.py install
 
+# Copy api-paste
+su -s /bin/sh -c "cp etc/zun/api-paste.ini /etc/zun" zun
 
 echo "[DEFAULT]
-transport_url = rabbit://openstack:$RABBIT_PASS@controller
+transport_url = rabbit://openstack:$RABBIT_PASS@ctl
 
 [api]
 host_ip = $MIIP
 port = 9517
 
 [database]
-connection = mysql+pymysql://zun:$ZUN_DBPASS@controller/zun
+connection = mysql+pymysql://zun:$ZUN_DBPASS@ctl/zun
 
 [keystone_auth]
-memcached_servers = controller:11211
-www_authenticate_uri = http://controller:5000
+memcached_servers = ctl:11211
+www_authenticate_uri = http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
 password = ZUN_PASS
 username = zun
-auth_url = http://controller:5000
+auth_url = http://ctl:5000
 auth_type = password
 auth_version = v3
 auth_protocol = http
@@ -79,14 +81,14 @@ service_token_roles_required = True
 endpoint_type = internalURL
 
 [keystone_authtoken]
-memcached_servers = controller:11211
-www_authenticate_uri = http://controller:5000
+memcached_servers = ctl:11211
+www_authenticate_uri = http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
 password = $ZUN_PASS
 username = zun
-auth_url = http://controller:5000
+auth_url = http://ctl:5000
 auth_type = password
 auth_version = v3
 auth_protocol = http
@@ -102,7 +104,7 @@ driver = messaging
 [websocket_proxy]
 wsproxy_host = $MIIP
 wsproxy_port = 6784
-base_url = ws://controller:6784/" > /etc/zun/zun.conf
+base_url = ws://ctl:6784/" > /etc/zun/zun.conf
 
 # Set owner to zun
 chown zun:zun /etc/zun/zun.conf

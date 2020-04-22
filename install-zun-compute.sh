@@ -46,20 +46,20 @@ echo "zun ALL=(root) NOPASSWD: /usr/local/bin/zun-rootwrap \
 
 # Write config
 echo "[DEFAULT]
-transport_url = rabbit://openstack:$RABBIT_PASS@controller
+transport_url = rabbit://openstack:$RABBIT_PASS@ctl
 state_path = /var/lib/zun
 
 [database]
-connection = mysql+pymysql://zun:$ZUN_DBPASS@controller/zun
-memcached_servers = controller:11211
+connection = mysql+pymysql://zun:$ZUN_DBPASS@ctl/zun
+memcached_servers = ctl:11211
 [keystone_auth]
-www_authenticate_uri = http://controller:5000
+www_authenticate_uri = http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
 password = ZUN_PASS
 username = zun
-auth_url = http://controller:5000
+auth_url = http://ctl:5000
 auth_type = password
 auth_version = v3
 auth_protocol = http
@@ -67,14 +67,14 @@ service_token_roles_required = True
 endpoint_type = internalURL
 
 [keystone_authtoken]
-memcached_servers = controller:11211
-www_authenticate_uri= http://controller:5000
+memcached_servers = ctl:11211
+www_authenticate_uri= http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
 password = ZUN_PASS
 username = zun
-auth_url = http://controller:5000
+auth_url = http://ctl:5000
 auth_type = password
 
 [oslo_concurrency]
@@ -89,7 +89,7 @@ chown zun:zun /etc/zun/zun.conf
 # Create docker service config
 mkdir -p /etc/systemd/system/docker.service.d
 echo "ExecStart=
-ExecStart=/usr/bin/dockerd --group zun -H tcp://compute1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://controller:2379" > /etc/systemd/system/docker.service.d/docker.conf
+ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-0:2375 -H unix:///var/run/docker.sock --cluster-store etcd://ctl:2379" > /etc/systemd/system/docker.service.d/docker.conf
 
 # restart docker
 systemctl daemon-reload
