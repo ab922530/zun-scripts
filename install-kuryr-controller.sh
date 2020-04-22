@@ -1,3 +1,5 @@
+#!/bin/sh
+
 source ./config.sh
 
 # source admin variables
