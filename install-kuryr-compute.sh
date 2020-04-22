@@ -14,7 +14,7 @@ mkdir -p /etc/kuryr
 chown kuryr:kuryr /etc/kuryr
 
 # Cloning and installing kuryr-libnetwork
-apt-get install python3-pip
+apt-get install -y python3-pip
 cd /var/lib/kuryr
 git clone -b master https://git.openstack.org/openstack/kuryr-libnetwork.git
 chown -R kuryr:kuryr kuryr-libnetwork
@@ -28,7 +28,7 @@ su -s /bin/sh -c "cp etc/kuryr.conf.sample \
       /etc/kuryr/kuryr.conf" kuryr
 
 # Write config
-echo '[DEFAULT]
+echo "[DEFAULT]
 bindir = /usr/local/libexec/kuryr
 capability_scope = global
 process_external_connectivity = False
@@ -38,13 +38,13 @@ www_authenticate_uri = http://controller:5000
 auth_url = http://controller:5000
 username = kuryr
 user_domain_name = default
-password = '"$KURYR_PASSWORD"'
+password = $KURYR_PASSWORD
 project_name = service
 project_domain_name = default
-auth_type = password' >> /etc/kuryr/kuryr.conf
+auth_type = password" > /etc/kuryr/kuryr.conf
 
 # Create service
-echo '[Unit]
+echo "[Unit]
 Description = Kuryr-libnetwork - Docker network plugin for Neutron
 
 [Service]
@@ -52,7 +52,7 @@ ExecStart = /usr/local/bin/kuryr-server --config-file /etc/kuryr/kuryr.conf
 CapabilityBoundingSet = CAP_NET_ADMIN
 
 [Install]
-WantedBy = multi-user.target' >> /etc/systemd/system/kuryr-libnetwork.service
+WantedBy = multi-user.target" > /etc/systemd/system/kuryr-libnetwork.service
 
 # Enable and start service
 systemctl enable kuryr-libnetwork

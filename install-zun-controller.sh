@@ -1,5 +1,6 @@
 source ./config.sh
 
+# Setup Database
 mysql --user="root" --password="$DBPASS" --execute="
 CREATE DATABASE zun;
 GRANT ALL PRIVILEGES ON zun.* TO 'zun'@'localhost' \
@@ -39,7 +40,7 @@ chown zun:zun /etc/zun
 
 # install dependencies
 apt-get update
-apt-get install python3-pip git
+apt-get install -y python3-pip git
 
 # clone and install zun
 cd /var/lib/zun
@@ -49,7 +50,6 @@ cd zun
 pip3 install -r requirements.txt
 python3 setup.py install
 
-MIIP=10.0.0.11
 
 echo "
 [DEFAULT]
@@ -101,7 +101,7 @@ driver = messaging
  [websocket_proxy]
  wsproxy_host = $MIIP
  wsproxy_port = 6784
- base_url = ws://controller:6784/" >> /etc/zun/zun.conf
+ base_url = ws://controller:6784/" > /etc/zun/zun.conf
 
 # Set owner to zun
 chown zun:zun /etc/zun/zun.conf
@@ -118,7 +118,7 @@ ExecStart = /usr/local/bin/zun-api
 User = zun
 
 [Install]
-WantedBy = multi-user.target" >> /etc/systemd/system/zun-api.service
+WantedBy = multi-user.target" > /etc/systemd/system/zun-api.service
 
 # Create upstart config for zun wsproxy
 echo "[Unit]
@@ -129,7 +129,7 @@ ExecStart = /usr/local/bin/zun-wsproxy
 User = zun
 
 [Install]
-WantedBy = multi-user.target" >> /etc/systemd/system/zun-wsproxy.service
+WantedBy = multi-user.target" > /etc/systemd/system/zun-wsproxy.service
 
 # Enable and start zun api
 systemctl enable zun-api

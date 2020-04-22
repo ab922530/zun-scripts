@@ -18,7 +18,7 @@ mkdir -p /etc/cni/net.d
 chown zun:zun /etc/cni/net.d
 
 # Install dependencies
-apt-get install python3-pip git numactl
+apt-get install -y python3-pip git numactl
 
 # Clone and install zun
 cd /var/lib/zun
@@ -77,7 +77,9 @@ auth_type = password
 
 [oslo_concurrency]
 lock_path = /var/lib/zun/tmp
-" >> /etc/zun/zun.conf
+
+[compute]
+host_shared_with_nova = true" > /etc/zun/zun.conf
 
 # Set owner of config
 chown zun:zun /etc/zun/zun.conf
@@ -85,15 +87,15 @@ chown zun:zun /etc/zun/zun.conf
 # Create docker service config
 mkdir -p /etc/systemd/system/docker.service.d
 echo "ExecStart=
-ExecStart=/usr/bin/dockerd --group zun -H tcp://compute1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://controller:2379" >> /etc/systemd/system/docker.service.d/docker.conf
+ExecStart=/usr/bin/dockerd --group zun -H tcp://compute1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://controller:2379" > /etc/systemd/system/docker.service.d/docker.conf
 
 # restart docker
 systemctl daemon-reload
 systemctl restart docker
 
 # configure containerd
-echo "[grpc]
-  gid = $(getent group zun | cut -d: -f3)" >> /etc/containerd/config.toml
+containerd config default > /etc/containerd/config.toml
+sed -i 's/gid \?=.*/gid = '$(getent group zun | cut -d: -f3)'/' 
 chown zun:zun /etc/containerd/config.toml
 
 # restart containerd
@@ -114,7 +116,7 @@ ExecStart = /usr/local/bin/zun-compute
 User = zun
 
 [Install]
-WantedBy = multi-user.target" >> /etc/systemd/system/zun-compute.service
+WantedBy = multi-user.target" > /etc/systemd/system/zun-compute.service
 
 # Create upstart config for zun cni daemon
 echo "[Unit]
@@ -125,7 +127,7 @@ ExecStart = /usr/local/bin/zun-cni-daemon
 User = zun
 
 [Install]
-WantedBy = multi-user.target" >> /etc/systemd/system/zun-cni-daemon.service
+WantedBy = multi-user.target" > /etc/systemd/system/zun-cni-daemon.service
 
 # Enable and start zun
 systemctl enable zun-compute
