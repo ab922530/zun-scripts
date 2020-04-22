@@ -89,7 +89,7 @@ chown zun:zun /etc/zun/zun.conf
 # Create docker service config
 mkdir -p /etc/systemd/system/docker.service.d
 echo "ExecStart=
-ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-0:2375 -H unix:///var/run/docker.sock --cluster-store etcd://ctl:2379" > /etc/systemd/system/docker.service.d/docker.conf
+ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://ctl:2379" > /etc/systemd/system/docker.service.d/docker.conf
 
 # restart docker
 systemctl daemon-reload
