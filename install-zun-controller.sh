@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./config.sh
+. ./config.sh
 
 # Setup Database
 mysql --user="root" --password="$DBPASS" --execute="
@@ -11,7 +11,7 @@ GRANT ALL PRIVILEGES ON zun.* TO 'zun'@'%' \
   IDENTIFIED BY '$ZUN_DBPASS';"
 
 # Source admin variables
-. admin-openrc.sh
+. ./admin-openrc.sh
 
 # create zun user and add as admin
 openstack user create --domain default --password $USER_PASS zun
@@ -53,8 +53,7 @@ pip3 install -r requirements.txt
 python3 setup.py install
 
 
-echo "
-[DEFAULT]
+echo "[DEFAULT]
 transport_url = rabbit://openstack:$RABBIT_PASS@controller
 
 [api]
@@ -100,10 +99,10 @@ lock_path = /var/lib/zun/tmp
 [oslo_messaging_notifications]
 driver = messaging
 
- [websocket_proxy]
- wsproxy_host = $MIIP
- wsproxy_port = 6784
- base_url = ws://controller:6784/" > /etc/zun/zun.conf
+[websocket_proxy]
+wsproxy_host = $MIIP
+wsproxy_port = 6784
+base_url = ws://controller:6784/" > /etc/zun/zun.conf
 
 # Set owner to zun
 chown zun:zun /etc/zun/zun.conf

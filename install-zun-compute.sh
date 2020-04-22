@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./config.sh
+. ./config.sh
 
 # Create User
 groupadd --system zun

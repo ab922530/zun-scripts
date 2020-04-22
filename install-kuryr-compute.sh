@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ./config.sh
+. ./config.sh
 
 # Creating kuryr user
 groupadd --system kuryr

@@ -1,9 +1,9 @@
 #!/bin/sh
 
-source ./config.sh
+. ./config.sh
 
 # source admin variables
-. admin-openrc.sh
+. ./admin-openrc.sh
 
 # create openstack user for kuryr, add as admin
 openstack user create --domain default --password $KURYR_PASSWORD kuryr
