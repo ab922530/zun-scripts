@@ -97,7 +97,7 @@ systemctl restart docker
 
 # configure containerd
 containerd config default > /etc/containerd/config.toml
-sed -i 's/gid \?=.*/gid = '$(getent group zun | cut -d: -f3)'/' 
+sed -i 's/gid \?=.*/gid = '$(getent group zun | cut -d: -f3)'/' /etc/containerd/config.toml
 chown zun:zun /etc/containerd/config.toml
 
 # restart containerd
