@@ -3,7 +3,7 @@
 . ./config.sh
 
 # Setup Database
-mysql --user="root" --password="$DBPASS" --execute="
+mysql --user="root" --password="$ZUN_DBPASS" --execute="
 CREATE DATABASE zun;
 GRANT ALL PRIVILEGES ON zun.* TO 'zun'@'localhost' \
   IDENTIFIED BY '$ZUN_DBPASS';
@@ -71,7 +71,7 @@ www_authenticate_uri = http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
-password = ZUN_PASS
+password = $ZUN_PASS
 username = zun
 auth_url = http://ctl:5000
 auth_type = password

@@ -3,6 +3,7 @@
 . ./config.sh
 
 # Create User
+echo "Creating zun user"
 groupadd --system zun
 useradd --home-dir "/var/lib/zun" \
       --create-home \
@@ -12,6 +13,7 @@ useradd --home-dir "/var/lib/zun" \
       zun
 
 # Create directories
+echo "Creating directories"
 mkdir -p /etc/zun
 chown zun:zun /etc/zun
 
@@ -20,9 +22,11 @@ mkdir -p /etc/cni/net.d
 chown zun:zun /etc/cni/net.d
 
 # Install dependencies
+echo "Installing dependencies"
 apt-get install -y python3-pip git numactl
 
 # Clone and install zun
+echo "Installing zun from sources"
 cd /var/lib/zun
 git clone https://opendev.org/openstack/zun.git
 chown -R zun:zun zun
@@ -31,6 +35,7 @@ pip3 install -r requirements.txt
 python3 setup.py install
 
 # Generate a sample configuration file
+echo "Generating sample configurations for zun"
 su -s /bin/sh -c "oslo-config-generator \
     --config-file etc/zun/zun-config-generator.conf" zun
 su -s /bin/sh -c "cp etc/zun/rootwrap.conf \
@@ -57,7 +62,7 @@ www_authenticate_uri = http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
-password = ZUN_PASS
+password = $ZUN_PASS
 username = zun
 auth_url = http://ctl:5000
 auth_type = password
@@ -72,7 +77,7 @@ www_authenticate_uri= http://ctl:5000
 project_domain_name = default
 project_name = service
 user_domain_name = default
-password = ZUN_PASS
+password = $ZUN_PASS
 username = zun
 auth_url = http://ctl:5000
 auth_type = password
@@ -88,7 +93,8 @@ chown zun:zun /etc/zun/zun.conf
 
 # Create docker service config
 mkdir -p /etc/systemd/system/docker.service.d
-echo "ExecStart=
+echo "[Service]
+ExecStart=
 ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://ctl:2379" > /etc/systemd/system/docker.service.d/docker.conf
 
 # restart docker
