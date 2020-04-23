@@ -99,7 +99,6 @@ crudini --set /etc/zun/zun.conf keystone_authtoken endpoint_type internalURL
 crudini --set /etc/zun/zun.conf oslo_concurrency lock_path /var/lib/zun/tmp
 crudini --set /etc/zun/zun.conf oslo_messaging_notifications driver messaging
 
-[websocket_proxy]
 crudini --set /etc/zun/zun.conf websocket_proxy wsproxy_host $MIIP
 crudini --set /etc/zun/zun.conf websocket_proxy wsproxy_port 6784
 crudini --set /etc/zun/zun.conf websocket_proxy base_url ws://$CONTROLLER:6784/
