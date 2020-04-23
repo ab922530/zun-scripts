@@ -38,6 +38,8 @@ python3 setup.py install
 echo "Generating sample configurations for zun"
 su -s /bin/sh -c "oslo-config-generator \
     --config-file etc/zun/zun-config-generator.conf" zun
+su -s /bin/sh -c "cp etc/zun/zun.conf.sample \
+    /etc/zun/zun.conf" zun
 su -s /bin/sh -c "cp etc/zun/rootwrap.conf \
     /etc/zun/rootwrap.conf" zun
 su -s /bin/sh -c "mkdir -p /etc/zun/rootwrap.d" zun
@@ -50,43 +52,38 @@ echo "zun ALL=(root) NOPASSWD: /usr/local/bin/zun-rootwrap \
     /etc/zun/rootwrap.conf *" | sudo tee /etc/sudoers.d/zun-rootwrap
 
 # Write config
-echo "[DEFAULT]
-transport_url = rabbit://openstack:$RABBIT_PASS@ctl
-state_path = /var/lib/zun
+crudini --set /etc/zun/zun.conf DEFAULT transport_url $RABBIT_URL
+crudini --set /etc/zun/zun.conf DEFAULT state_path /var/lib
 
-[database]
-connection = mysql+pymysql://zun:$ZUN_DBPASS@ctl/zun
-memcached_servers = ctl:11211
-[keystone_auth]
-www_authenticate_uri = http://ctl:5000
-project_domain_name = default
-project_name = service
-user_domain_name = default
-password = $ZUN_PASS
-username = zun
-auth_url = http://ctl:5000
-auth_type = password
-auth_version = v3
-auth_protocol = http
-service_token_roles_required = True
-endpoint_type = internalURL
+crudini --set /etc/zun/zun.conf database connection "mysql+pymysql://zun:$ZUN_DBPASS@$CONTROLLER/zun"
+crudini --set /etc/zun/zun.conf database memcached_servers $CONTROLLER:11211
 
-[keystone_authtoken]
-memcached_servers = ctl:11211
-www_authenticate_uri= http://ctl:5000
-project_domain_name = default
-project_name = service
-user_domain_name = default
-password = $ZUN_PASS
-username = zun
-auth_url = http://ctl:5000
-auth_type = password
+crudini --set /etc/zun/zun.conf keystone_auth www_authenticate_uri http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_auth project_domain_name default
+crudini --set /etc/zun/zun.conf keystone_auth project_name service
+crudini --set /etc/zun/zun.conf keystone_auth user_domain_name default
+crudini --set /etc/zun/zun.conf keystone_auth password "$ZUN_PASS"
+crudini --set /etc/zun/zun.conf keystone_auth username zun
+crudini --set /etc/zun/zun.conf keystone_auth auth_url http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_auth auth_type password
+crudini --set /etc/zun/zun.conf keystone_auth auth_version v3
+crudini --set /etc/zun/zun.conf keystone_auth auth_protocol http
+crudini --set /etc/zun/zun.conf keystone_auth service_token_roles_required True
+crudini --set /etc/zun/zun.conf keystone_auth endpoint_type internalURL
 
-[oslo_concurrency]
-lock_path = /var/lib/zun/tmp
+crudini --set /etc/zun/zun.conf keystone_authtoken memcached_servers $CONTROLLER:11211
+crudini --set /etc/zun/zun.conf keystone_authtoken www_authenticate_uri http://$CONTROLLER:500
+crudini --set /etc/zun/zun.conf keystone_authtoken project_domain_name default
+crudini --set /etc/zun/zun.conf keystone_authtoken project_name service
+crudini --set /etc/zun/zun.conf keystone_authtoken user_domain_name default
+crudini --set /etc/zun/zun.conf keystone_authtoken password "$ZUN_PASS"
+crudini --set /etc/zun/zun.conf keystone_authtoken zun
+crudini --set /etc/zun/zun.conf keystone_authtoken auth_url http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_authtoken password
 
-[compute]
-host_shared_with_nova = true" > /etc/zun/zun.conf
+crudini --set /etc/zun/zun.conf oslo_concurrency lock_path /var/lib/zun/tmp
+
+crudini --set /etc/zun/zun.conf compute host_shared_with_nova true
 
 # Set owner of config
 chown zun:zun /etc/zun/zun.conf
@@ -95,7 +92,7 @@ chown zun:zun /etc/zun/zun.conf
 mkdir -p /etc/systemd/system/docker.service.d
 echo "[Service]
 ExecStart=
-ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://ctl:2379" > /etc/systemd/system/docker.service.d/docker.conf
+ExecStart=/usr/bin/dockerd --group zun -H tcp://cp-1:2375 -H unix:///var/run/docker.sock --cluster-store etcd://$CONTROLLER:2379" > /etc/systemd/system/docker.service.d/docker.conf
 
 # restart docker
 systemctl daemon-reload

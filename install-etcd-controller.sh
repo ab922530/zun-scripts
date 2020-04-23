@@ -7,11 +7,11 @@ apt-get update
 apt-get install -y etcd
 
 # Set configuration values
-echo 'ETCD_NAME="ctl"
+echo 'ETCD_NAME="'"$CONTROLLER"'"
 ETCD_DATA_DIR="/var/lib/etcd"
 ETCD_INITIAL_CLUSTER_STATE="new"
 ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster-01"
-ETCD_INITIAL_CLUSTER="ctl=http://'"$MIIP"':2380"
+ETCD_INITIAL_CLUSTER="'"$CONTROLLER"'=http://'"$MIIP"':2380"
 ETCD_INITIAL_ADVERTISE_PEER_URLS="http://'"$MIIP"':2380"
 ETCD_ADVERTISE_CLIENT_URLS="http://'"$MIIP"':2379"
 ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"

@@ -1,8 +1,9 @@
+. ./settings
+
 # Passwords
 ZUN_PASS=L1Z4rd
 ZUN_DBPASS=L1Z4rd
 USER_PASS=L1Z4rd
-RABBIT_PASS=L1Z4rd
 KURYR_PASS=L1Z4rd
 
 # Config

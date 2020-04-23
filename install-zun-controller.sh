@@ -21,11 +21,11 @@ openstack role add --project service --user zun admin
 openstack service create --name zun \
     --description "Container Service" container
 openstack endpoint create --region RegionOne \
-    container public http://ctl:9517/v1
+    container public http://$CONTROLLER:9517/v1
 openstack endpoint create --region RegionOne \
-    container internal http://ctl:9517/v1
+    container internal http://$CONTROLLER:9517/v1
 openstack endpoint create --region RegionOne \
-    container admin http://ctl:9517/v1
+    container admin http://$CONTROLLER:9517/v1
 
 # Create zun user
 groupadd --system zun
@@ -52,59 +52,57 @@ cd zun
 pip3 install -r requirements.txt
 python3 setup.py install
 
+# Generate sample config
+su -s /bin/sh -c "oslo-config-generator \
+    --config-file etc/zun/zun-config-generator.conf" zun
+su -s /bin/sh -c "cp etc/zun/zun.conf.sample \
+    /etc/zun/zun.conf" zun
+
 # Copy api-paste
 su -s /bin/sh -c "cp etc/zun/api-paste.ini /etc/zun" zun
 
-echo "[DEFAULT]
-transport_url = rabbit://openstack:$RABBIT_PASS@ctl
+crudini --set /etc/zun/zun.conf DEFAULT transport_url $RABBIT_URL
 
-[api]
-host_ip = $MIIP
-port = 9517
+crudini --set /etc/zun/zun.conf api host_ip $MIIP
+crudini --set /etc/zun/zun.conf api port 9517
 
-[database]
-connection = mysql+pymysql://zun:$ZUN_DBPASS@ctl/zun
+crudini --set /etc/zun/zun.conf database connection "mysql+pymysql://zun:$ZUN_DBPASS@$CONTROLLER/zun"
 
-[keystone_auth]
-memcached_servers = ctl:11211
-www_authenticate_uri = http://ctl:5000
-project_domain_name = default
-project_name = service
-user_domain_name = default
-password = $ZUN_PASS
-username = zun
-auth_url = http://ctl:5000
-auth_type = password
-auth_version = v3
-auth_protocol = http
-service_token_roles_required = True
-endpoint_type = internalURL
+crudini --set /etc/zun/zun.conf keystone_auth memcached_servers $CONTROLLER:11211
+crudini --set /etc/zun/zun.conf keystone_auth www_authenticate_uri http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_auth project_domain_name default
+crudini --set /etc/zun/zun.conf keystone_auth project_name service
+crudini --set /etc/zun/zun.conf keystone_auth user_domain_name default
+crudini --set /etc/zun/zun.conf keystone_auth password "$ZUN_PASS"
+crudini --set /etc/zun/zun.conf keystone_auth username zun
+crudini --set /etc/zun/zun.conf keystone_auth auth_url http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_auth auth_type password
+crudini --set /etc/zun/zun.conf keystone_auth auth_version v3
+crudini --set /etc/zun/zun.conf keystone_auth auth_protocol http
+crudini --set /etc/zun/zun.conf keystone_auth service_token_roles_required True
+crudini --set /etc/zun/zun.conf keystone_auth endpoint_type internalURL
 
-[keystone_authtoken]
-memcached_servers = ctl:11211
-www_authenticate_uri = http://ctl:5000
-project_domain_name = default
-project_name = service
-user_domain_name = default
-password = $ZUN_PASS
-username = zun
-auth_url = http://ctl:5000
-auth_type = password
-auth_version = v3
-auth_protocol = http
-service_token_roles_required = True
-endpoint_type = internalURL
+crudini --set /etc/zun/zun.conf keystone_authtoken memcached_servers $CONTROLLER:11211
+crudini --set /etc/zun/zun.conf keystone_authtoken www_authenticate_uri http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_authtoken project_domain_name default
+crudini --set /etc/zun/zun.conf keystone_authtoken project_name service
+crudini --set /etc/zun/zun.conf keystone_authtoken user_domain_name default
+crudini --set /etc/zun/zun.conf keystone_authtoken password "$ZUN_PASS"
+crudini --set /etc/zun/zun.conf keystone_authtoken username zun
+crudini --set /etc/zun/zun.conf keystone_authtoken auth_url http://$CONTROLLER:5000
+crudini --set /etc/zun/zun.conf keystone_authtoken auth_type password
+crudini --set /etc/zun/zun.conf keystone_authtoken auth_version v3
+crudini --set /etc/zun/zun.conf keystone_authtoken auth_protocol http
+crudini --set /etc/zun/zun.conf keystone_authtoken service_token_roles_required True
+crudini --set /etc/zun/zun.conf keystone_authtoken endpoint_type internalURL
 
-[oslo_concurrency]
-lock_path = /var/lib/zun/tmp
-
-[oslo_messaging_notifications]
-driver = messaging
+crudini --set /etc/zun/zun.conf oslo_concurrency lock_path /var/lib/zun/tmp
+crudini --set /etc/zun/zun.conf oslo_messaging_notifications driver messaging
 
 [websocket_proxy]
-wsproxy_host = $MIIP
-wsproxy_port = 6784
-base_url = ws://ctl:6784/" > /etc/zun/zun.conf
+crudini --set /etc/zun/zun.conf websocket_proxy wsproxy_host $MIIP
+crudini --set /etc/zun/zun.conf websocket_proxy wsproxy_port 6784
+crudini --set /etc/zun/zun.conf websocket_proxy base_url ws://$CONTROLLER:6784/
 
 # Set owner to zun
 chown zun:zun /etc/zun/zun.conf

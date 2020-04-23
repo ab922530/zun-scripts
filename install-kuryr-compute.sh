@@ -30,20 +30,18 @@ su -s /bin/sh -c "cp etc/kuryr.conf.sample \
       /etc/kuryr/kuryr.conf" kuryr
 
 # Write config
-echo "[DEFAULT]
-bindir = /usr/local/libexec/kuryr
-capability_scope = global
-process_external_connectivity = False
+crudini --set /etc/kuryr/kuryr.conf DEFAULT bindir /usr/local/libexec/kuryr
+crudini --set /etc/kuryr/kuryr.conf DEFAULT capability_scope global
+crudini --set /etc/kuryr/kuryr.conf DEFAULT process_external_connectivity False
 
-[neutron]
-www_authenticate_uri = http://ctl:5000
-auth_url = http://ctl:5000
-username = kuryr
-user_domain_name = default
-password = $KURYR_PASS
-project_name = service
-project_domain_name = default
-auth_type = password" > /etc/kuryr/kuryr.conf
+crudini --set /etc/kuryr/kuryr.conf neutron www_authenticate_uri http://$CONTROLLER:5000
+crudini --set /etc/kuryr/kuryr.conf neutron auth_url http://$CONTROLLER:5000
+crudini --set /etc/kuryr/kuryr.conf neutron username kuryr
+crudini --set /etc/kuryr/kuryr.conf neutron user_domain_name default
+crudini --set /etc/kuryr/kuryr.conf neutron password "$KURYR_PASS"
+crudini --set /etc/kuryr/kuryr.conf neutron project_name service
+crudini --set /etc/kuryr/kuryr.conf neutron project_domain_name default
+crudini --set /etc/kuryr/kuryr.conf neutron auth_type password
 
 # Create service
 echo "[Unit]
